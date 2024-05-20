@@ -15,6 +15,7 @@ with gr.Blocks(css=css, fill_height=True) as demo:
 
     chatbot = gr.Chatbot(
         value=[],
+        label="Conversation",
         elem_id="chatbot",
         bubble_full_width=False,
         show_copy_button=True
@@ -40,13 +41,14 @@ with gr.Blocks(css=css, fill_height=True) as demo:
 
         audio_listener = gr.Audio(
             sources=["microphone"],
+            label="Entrée Audio",
             type="filepath"
         )
 
         send_audio_btn = gr.Button("Envoyer Audio")
         listen_btn = gr.Button("Ecouter la réponse")
 
-        chatbot.height = '65vh'
+        chatbot.height = '58vh'
 
         audio_msg = send_audio_btn.click(
             fn=submit_audio,
@@ -60,7 +62,10 @@ with gr.Blocks(css=css, fill_height=True) as demo:
         listen_msg = listen_btn.click(
             fn=generate_speech,
             inputs=[chatbot],
-            outputs=gr.Audio(label="Generated Speech", type="filepath")
+            outputs=gr.Audio(
+                label="Sortie Audio",
+                type="filepath"
+                )
         )
 
 demo.queue()
