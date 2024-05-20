@@ -6,7 +6,7 @@ from langchain_mistralai.chat_models import ChatMistralAI
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains.retrieval import create_retrieval_chain
 from services.prompts import main_prompt
-from services.utils import load_document, split_document, embed_document
+from services.utils import load_document, split_document, embed_document, split_document_by_sections
 from dotenv import load_dotenv
 import time as t
 import os
@@ -20,6 +20,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 def init_RAG():
     document = load_document("data/AJ_chemicals.pdf")
     splitted_document = split_document(document)
+    # splitted_document = split_document_by_sections(document)
     embeded_document = embed_document(splitted_document)
 
     LLM_model = ChatMistralAI(model="open-mistral-7b", mistral_api_key=MISTRALAI_API_KEY)
@@ -85,7 +86,7 @@ def generate_speech(history):
     speech_file_path = Path("data/generated_speech.mp3")
     response = client.audio.speech.create(
         model="tts-1",
-        voice="alloy",
+        voice="onyx",
         input=text
     )
     response.stream_to_file(speech_file_path)
