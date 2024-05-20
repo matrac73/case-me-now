@@ -1,5 +1,5 @@
 import gradio as gr
-from services.services import add_message, history_generator
+from services.services import submit_message, history_generator, submit_audio
 
 css = """
 html, body, #root {
@@ -9,6 +9,7 @@ footer {
     display: none !important;
 }
 """
+
 
 with gr.Blocks(css=css, fill_height=True) as demo:
 
@@ -26,11 +27,24 @@ with gr.Blocks(css=css, fill_height=True) as demo:
         show_label=False
     )
 
+    audio_listener = gr.Audio(
+        sources=["microphone"],
+        type="filepath"
+    )
+
+    send_audio_btn = gr.Button("Envoyer Audio")
+
     chatbot.height = '82vh'
 
     chat_msg = chat_input.submit(
-        fn=add_message,
+        fn=submit_message,
         inputs=[chatbot, chat_input],
+        outputs=[chatbot, chat_input]
+    )
+
+    audio_msg = send_audio_btn.click(
+        fn=submit_audio,
+        inputs=[chatbot, audio_listener],
         outputs=[chatbot, chat_input]
     )
 

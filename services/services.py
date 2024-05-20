@@ -1,4 +1,6 @@
+from openai import OpenAI
 import gradio as gr
+from pathlib import Path
 from langchain.prompts import ChatPromptTemplate
 from langchain_mistralai.chat_models import ChatMistralAI
 from langchain.chains.combine_documents import create_stuff_documents_chain
@@ -9,6 +11,7 @@ from dotenv import load_dotenv
 import time as t
 import os
 
+client = OpenAI()
 load_dotenv()
 MISTRALAI_API_KEY = os.getenv("MISTRALAI_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -46,7 +49,7 @@ def history_generator(history):
         yield history
 
 
-def add_message(history, message):
+def submit_message(history, message):
     for x in message["files"]:
         history.append(((x,), None))
     if message["text"] is not None:
@@ -54,16 +57,24 @@ def add_message(history, message):
     return history, gr.MultimodalTextbox(value=None, interactive=False)
 
 
-# def transcript(audio):
-#     try:
-#         client = OpenAI(api_key=OPENAI_API_KEY)
-#         audio_file = open(audio, "rb")
-#         transcriptions = client.audio.transcriptions.create(
-#             model="whisper-1",
-#             file=audio_file,
-#             response_format="text"
-#         )
-#         return transcriptions
-#     except Exception as error:
-#         print(str(error))
-#         raise gr.Error("An error occurred while generating speech. Please check your API key and try again.")
+def handle_audio(audio_path):
+    text = STT(audio_path)
+    if text:
+        return text
+    return "Désolé, je n'ai pas pu reconnaître l'audio."
+
+
+def submit_audio(history, audio_file):
+    text = handle_audio(audio_file)
+    message = {'text': text, 'files': []}
+    return submit_message(history, message)
+
+
+def STT(audio_file_path):
+    audio_path = Path(audio_file_path)
+    transcription = client.audio.transcriptions.create(
+        model="whisper-1",
+        file=audio_path,
+        response_format="text"
+        )
+    return transcription
