@@ -1,5 +1,5 @@
 import gradio as gr
-from services.services import submit_message, history_generator, submit_audio
+from services.services import submit_message, history_generator, submit_audio, generate_speech
 
 css = """
 html, body, #root {
@@ -27,15 +27,6 @@ with gr.Blocks(css=css, fill_height=True) as demo:
         show_label=False
     )
 
-    audio_listener = gr.Audio(
-        sources=["microphone"],
-        type="filepath"
-    )
-
-    send_audio_btn = gr.Button("Envoyer Audio")
-
-    chatbot.height = '82vh'
-
     chat_msg = chat_input.submit(
         fn=submit_message,
         inputs=[chatbot, chat_input],
@@ -45,14 +36,32 @@ with gr.Blocks(css=css, fill_height=True) as demo:
     bot_msg = chat_msg.then(history_generator, chatbot, chatbot, api_name="bot_response")
     bot_msg.then(lambda: gr.MultimodalTextbox(interactive=True), None, [chat_input])
 
-    audio_msg = send_audio_btn.click(
-        fn=submit_audio,
-        inputs=[chatbot, audio_listener],
-        outputs=[chatbot, chat_input]
-    )
+    with gr.Row():
 
-    bot_msg = audio_msg.then(history_generator, chatbot, chatbot, api_name="bot_response")
-    bot_msg.then(lambda: gr.MultimodalTextbox(interactive=True), None, [chat_input])
+        audio_listener = gr.Audio(
+            sources=["microphone"],
+            type="filepath"
+        )
+
+        send_audio_btn = gr.Button("Envoyer Audio")
+        listen_btn = gr.Button("Ecouter la réponse")
+
+        chatbot.height = '65vh'
+
+        audio_msg = send_audio_btn.click(
+            fn=submit_audio,
+            inputs=[chatbot, audio_listener],
+            outputs=[chatbot, chat_input]
+        )
+
+        bot_msg = audio_msg.then(history_generator, chatbot, chatbot, api_name="bot_response")
+        bot_msg.then(lambda: gr.MultimodalTextbox(interactive=True), None, [chat_input])
+
+        listen_msg = listen_btn.click(
+            fn=generate_speech,
+            inputs=[chatbot],
+            outputs=gr.Audio(label="Generated Speech", type="filepath")
+        )
 
 demo.queue()
 if __name__ == "__main__":

@@ -78,3 +78,15 @@ def STT(audio_file_path):
         response_format="text"
         )
     return transcription
+
+
+def generate_speech(history):
+    text = history[-1][-1]
+    speech_file_path = Path("data/generated_speech.mp3")
+    response = client.audio.speech.create(
+        model="tts-1",
+        voice="alloy",
+        input=text
+    )
+    response.stream_to_file(speech_file_path)
+    return speech_file_path
