@@ -42,13 +42,16 @@ with gr.Blocks(css=css, fill_height=True) as demo:
         outputs=[chatbot, chat_input]
     )
 
+    bot_msg = chat_msg.then(history_generator, chatbot, chatbot, api_name="bot_response")
+    bot_msg.then(lambda: gr.MultimodalTextbox(interactive=True), None, [chat_input])
+
     audio_msg = send_audio_btn.click(
         fn=submit_audio,
         inputs=[chatbot, audio_listener],
         outputs=[chatbot, chat_input]
     )
 
-    bot_msg = chat_msg.then(history_generator, chatbot, chatbot, api_name="bot_response")
+    bot_msg = audio_msg.then(history_generator, chatbot, chatbot, api_name="bot_response")
     bot_msg.then(lambda: gr.MultimodalTextbox(interactive=True), None, [chat_input])
 
 demo.queue()
