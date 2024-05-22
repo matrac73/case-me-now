@@ -1,6 +1,7 @@
 import gradio as gr
 from services.services import submit_message, history_generator, submit_audio, generate_speech
 from services.theme import theme
+from services.prompts import splitted_document
 
 css = """
 html, body, #root {
@@ -15,7 +16,7 @@ with gr.Blocks(css=css, fill_height=True, theme=theme) as demo:
     with gr.Tab("Copilot"):
         with gr.Column():
             chatbot = gr.Chatbot(
-                value=[],
+                value=[[None, splitted_document['Intro']]],
                 label="Conversation",
                 elem_id="chatbot",
                 bubble_full_width=False,

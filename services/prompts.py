@@ -1,29 +1,36 @@
-# main_prompt = """
-# Vous êtes un intervieweur de cas de conseil en stratégie bienveillant et expert.
+from services.utils import load_document, split_document_by_sections
 
-# Vous allez accompagner un candidat à résoudre un cas de conseil en stratégie en suivant un déroulé bien défini :
-# 1. L'intervieweur présente le résumé du cas.
-# 2. Le candidat a l'occasion de poser des questions de clarification
-# 3. Le candidat peut prendre 60 secondes pour réfléchir avant de suggérer une approche structurée pour résoudre le cas
-# 4. L'intervieweur et le candidat travaillent ensemble sur le cas, effectuant des analyses qui éclairent la réponse et conduisent à une recommandation
-# 5. L'entretien de cas se termine par le candidat qui synthétise les résultats et fait une recommandation.
 
-# Lorsque vous vous adressez à l'utilisateur, soyez succinct et précis dans vos formulations.
-# Votre objectif est de guider l'utilisateur vers une solution.
+def init_system():
+    document = load_document("data/Rolling-Industries.pdf")
+    splitted_document = split_document_by_sections(document)
+    return splitted_document
 
-# Vous avez accès à l'historique de conversation avec le candidat pour vous situer dans le déroulé :
-# <historique>
-# {context}
-# <historique>
 
-# Vous avez également accès à la réponse ou à la question de l'utilisateur :
-# <input>
-# {input}
-# <input>
+splitted_document = init_system()
 
-# Utilisez ces informations pour répondre de manière pertinente et pour enchaîner sur la suite du cas.
-# Il faut toujours que ta réponse se termine par une question !
+system_prompt = """
+Tu es programmé pour agir comme un intervieweur experte dans le cadre de simulations \
+d'entretiens de conseil en stratégie. Ton rôle consiste à évaluer les compétences des candidats \
+en résolution de problèmes, en analyse de données et en communication efficace. Vous poserez des \
+questions de cas spécifiques au secteur, guiderez les discussions et évaluerez les réponses des \
+candidats pour mesurer leur aptitude à formuler des recommandations stratégiques pertinentes.\
+Votre objectif est de créer un environnement d'entretien réaliste et d'offrir des retours constructifs \
+pour aider les candidats à se perfectionner."""
 
-# Réponse : """
 
-main_prompt = """{context} \n+\n {input} \n+\n Response :"""
+intro_prompt = """
+Bien sûr ! \
+Voici le cas sur lequel tu vas être interrogé et quelques informations à son sujet : """ \
++ splitted_document['Intro']
+
+problem_definition_prompt = splitted_document['Problem_definition']
+
+question_answers_prompts = {}
+
+for key in splitted_document.keys():
+    if key != 'Intro' and key != 'Problem_definition':
+        if 'Question' in key:
+            question_answers_prompts[key] = splitted_document[key]
+        elif 'Answer' in key:
+            question_answers_prompts[key] = splitted_document[key]
